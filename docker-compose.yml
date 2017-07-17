@@ -1,0 +1,41 @@
+version: '3'
+
+# As of Titan 1.0.0, only Cassandra 2.1 and Elasticsearch 1.5
+# are supported. Attempting to run it on Cassandra 3 results in tears.
+#
+# Here's the compatibility matrix:
+#   http://s3.thinkaurelius.com/docs/titan/1.0.0/version-compat.html
+
+services:
+  titan:
+    image: titan:1.0.0-hadoop1
+    build:
+      dockerfile: Dockerfile.titan
+      args:
+        version: 1.0.0-hadoop1
+      context: ./
+    ports:
+      - "8182:8182"
+      - "8184:8184"
+    depends_on:
+      - db
+      - index
+  db:
+    image: cassandra:2.1
+    ports:
+     # http://cassandra.apache.org/doc/latest/faq/index.html#what-ports
+     # CQL ports
+     - "9042:9042"
+     - "9142:9142"
+     # Thrift
+     - "9160:9160"
+     # Internode
+     - "7000:7000"
+     - "7001:7001"
+     # JMX
+     - "7199:7199"
+  index:
+    image: elasticsearch:1.5
+    ports:
+     - "9200:9200"
+     - "9300:9300"
