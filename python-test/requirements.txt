@@ -1,1 +1,2 @@
 aiogremlin==3.2.5
+gremlinpython==3.2.5
