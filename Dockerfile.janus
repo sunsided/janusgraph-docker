@@ -1,0 +1,21 @@
+FROM openjdk:8-jdk
+MAINTAINER Markus Mayer <widemeadows@gmail.com>
+
+ARG version=0.1.1
+ARG hadoop=hadoop2
+
+RUN apt-get update && \
+    apt-get install -y wget unzip htop && \
+    mkdir /workspace && \
+    cd /workspace && \
+    wget https://github.com/JanusGraph/janusgraph/releases/download/v$version/janusgraph-$version-$hadoop.zip && \
+    unzip janusgraph-$version-$hadoop.zip && \
+    rm janusgraph-$version-$hadoop.zip && \
+    mv janusgraph-* janusgraph
+
+COPY janusgraph/run.sh /workspace/janusgraph
+COPY janusgraph/gremlin-server.yaml /workspace/janusgraph/conf/gremlin-server/gremlin-server.yaml
+COPY janusgraph/janusgraph.properties /workspace/janusgraph/janusgraph.properties
+
+WORKDIR /workspace/janusgraph
+CMD ["/bin/bash", "-e", "/workspace/janusgraph/run.sh"]

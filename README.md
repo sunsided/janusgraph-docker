@@ -1,6 +1,20 @@
-# Titan: Lessons learned
+# JanusGraph: Lessons learned
 
-Sources for the `Dockerfile` and surroundings:
+Docker deployment of [JanusGraph](http://janusgraph.org/). To run,
+
+```
+docker-compose up --build
+```
+
+Note that a version of `docker-compose` with support for version `3` schemas is required, e.g. `1.15.0`.
+
+Afterwards, you can connect to the local Gremlin shell using
+
+```
+docker exec -it janusgraph_janus_1 ./bin/gremlin.sh
+```
+
+Sources for the `Dockerfile` and their surroundings were basically straight from Titan:
 
 * [efaurie/docker-titan-cassandra](https://github.com/efaurie/docker-titan-cassandra)
 * [elubow/titan-gremlin](https://github.com/elubow/titan-gremlin)
@@ -13,7 +27,7 @@ For multiple graphs in Titan, follow these links:
 
 ## Cassandra and Elasticsearch
 
-As per [compatibility matrix](http://s3.thinkaurelius.com/docs/titan/1.0.0/version-compat.html), the supported Cassandra version is 2.1 and the supported Elasticsearch version is 1.5.
+As per [compatibility matrix](http://docs.janusgraph.org/latest/version-compat.html), the supported Cassandra version is 2.1 and the supported Elasticsearch version is 1.5.
 
 ## Shell
 
@@ -38,9 +52,22 @@ gremlin> :> g.V().values('name')
 ```
 
 The token `:>` is not part of the _shell_, but an actual _command_. It is required to run the command on the remote server.
-Also, entering invalid commands in the shell results in an exception on the server.
+
+That makes the commands:
+
+```
+:remote connect tinkerpop.server conf/remote.yaml
+:> graph.addVertex("name", "stephen")
+:> g.V().values('name')
+```
+
+Entering invalid commands in the shell results in an exception on the server.
+
+The `g` mapping (available at the server) is registered in `scripts/empty-sample.groovy`.
 
 ## Channelizers
+
+You [have to choose the Channelizer](http://docs.janusgraph.org/latest/server.html#_websocket_versus_rest) to work with, either `HttpChannelizer` or `WebSocketChannelizer`.
 
 Using the `HttpChannelizer` 
 
@@ -48,7 +75,7 @@ Using the `HttpChannelizer`
 channelizer: org.apache.tinkerpop.gremlin.server.channel.HttpChannelizer
 ```
 
-allows for HTTP access to Titan using e.g.
+allows for HTTP access to JanusGraph using e.g.
 
 ```bash
 curl "http://localhost:8182/?gremlin=100-1"

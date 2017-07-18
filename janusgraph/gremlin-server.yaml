@@ -6,19 +6,15 @@ scriptEvaluationTimeout: 30000
 serializedResponseTimeout: 30000
 channelizer: org.apache.tinkerpop.gremlin.server.channel.WebSocketChannelizer
 graphs: {
-  graph: titan.properties
+  graph: janusgraph.properties
 }
 plugins:
-  - aurelius.titan
-  - tinkerpop.tinkergraph
+  - janusgraph.imports
 scriptEngines: {
   gremlin-groovy: {
     imports: [java.lang.Math],
     staticImports: [java.lang.Math.PI],
-    scripts: [scripts/empty-sample.groovy]},
-  nashorn: {
-      imports: [java.lang.Math],
-      staticImports: [java.lang.Math.PI]}}
+    scripts: [scripts/empty-sample.groovy]}}
 serializers:
   - { className: org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0, config: { useMapperFromGraph: graph }}
   - { className: org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0, config: { serializeResultToString: true }}

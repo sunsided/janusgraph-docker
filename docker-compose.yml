@@ -7,12 +7,13 @@ version: '3'
 #   http://s3.thinkaurelius.com/docs/titan/1.0.0/version-compat.html
 
 services:
-  titan:
-    image: titan:1.0.0-hadoop1
+  janus:
+    image: janusgraph:1.0.0-hadoop2
     build:
-      dockerfile: Dockerfile.titan
+      dockerfile: Dockerfile.janus
       args:
-        version: 1.0.0-hadoop1
+        version: 0.1.1
+        hadoop: hadoop2
       context: ./
     ports:
       - "8182:8182"
