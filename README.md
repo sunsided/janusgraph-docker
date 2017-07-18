@@ -16,12 +16,12 @@ docker exec -it janusgraph_janus_1 ./bin/gremlin.sh
 
 The `python-test` subdirectories contains some simplistic Python scripts to test communication with JanusGraph.
 
-Sources for the `Dockerfile` and their surroundings were basically straight from Titan:
+Sources for the `Dockerfile` and their surroundings were basically taken straight from Titan setups:
 
 * [efaurie/docker-titan-cassandra](https://github.com/efaurie/docker-titan-cassandra)
 * [elubow/titan-gremlin](https://github.com/elubow/titan-gremlin)
 
-For multiple graphs in Titan, follow these links:
+For multiple graphs in Titan (and likely also JanusGraph), follow these links:
 
 * [How many graphs can i create in one Titan DB?](https://stackoverflow.com/a/40545537/195651)
 * [Serving multiple Titan graphs over Gremlin Server (TinkerPop 3)](https://medium.com/@jbmusso/serving-multiple-titan-graphs-over-gremlin-server-tinkerpop-3-d3c971d07964)
