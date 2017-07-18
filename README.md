@@ -14,6 +14,8 @@ Afterwards, you can connect to the local Gremlin shell using
 docker exec -it janusgraph_janus_1 ./bin/gremlin.sh
 ```
 
+The `python-test` subdirectories contains some simplistic Python scripts to test communication with JanusGraph.
+
 Sources for the `Dockerfile` and their surroundings were basically straight from Titan:
 
 * [efaurie/docker-titan-cassandra](https://github.com/efaurie/docker-titan-cassandra)
@@ -126,6 +128,71 @@ The REPL shell does seem to work with the `WebSocketChannelizer` though:
 
 ```
 channelizer: org.apache.tinkerpop.gremlin.server.channel.WebSocketChannelizer
+```
+
+## Serializers
+
+The exception `Gremlin Server is not configured with a serializer for the requested mime type [application/vnd.gremlin-v2.0+json] - using org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerV1d0 by default` occurs when the `GraphSONMessageSerializerGremlinV2d0` was not added to the serializers list of serializers.
+
+Running with the configuration of
+
+```
+  - { className: org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0, config: { useMapperFromGraph: graph }}
+  - { className: org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0, config: { serializeResultToString: true }}
+  - { className: org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerGremlinV1d0, config: { useMapperFromGraph: graph }}
+  - { className: org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerGremlinV2d0, config: { useMapperFromGraph: graph }}
+  - { className: org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerV1d0, config: { useMapperFromGraph: graph }}
+  - { className: org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerV2d0, config: { useMapperFromGraph: graph }}
+```
+
+results in these startup outputs:
+
+```
+janus_1  | 40470 [main] INFO  org.apache.tinkerpop.gremlin.server.AbstractChannelizer  - Configured application/vnd.gremlin-v1.0+gryo with org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0
+janus_1  | 40470 [main] INFO  org.apache.tinkerpop.gremlin.server.AbstractChannelizer  - Configured application/vnd.gremlin-v1.0+gryo-stringd with org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0
+janus_1  | 40476 [main] INFO  org.apache.tinkerpop.gremlin.server.AbstractChannelizer  - Configured application/vnd.gremlin-v1.0+json with org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerGremlinV1d0
+janus_1  | 40496 [main] INFO  org.apache.tinkerpop.gremlin.server.AbstractChannelizer  - Configured application/vnd.gremlin-v2.0+json with org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerGremlinV2d0
+janus_1  | 40497 [main] INFO  org.apache.tinkerpop.gremlin.server.AbstractChannelizer  - Configured application/json with org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerV1d0
+```
+
+Here's the full exception rendering:
+
+```
+janus_1  | 1481034 [gremlin-server-worker-1] WARN  org.apache.tinkerpop.gremlin.server.handler.WsGremlinBinaryRequestDecoder  - Gremlin Server is not configured with a serializer for the requested mime type [application/vnd.gremlin-v2.0+json] - using org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerV1d0 by default
+janus_1  | 1481034 [gremlin-server-worker-1] WARN  org.apache.tinkerpop.gremlin.driver.ser.AbstractGraphSONMessageSerializerV1d0  - Request [PooledUnsafeDirectByteBuf(ridx: 226, widx: 226, cap: 260)] could not be deserialized by org.apache.tinkerpop.gremlin.driver.ser.AbstractGraphSONMessageSerializerV1d0.
+janus_1  | 1481034 [gremlin-server-worker-1] WARN  org.apache.tinkerpop.gremlin.server.handler.OpSelectorHandler  - Invalid OpProcessor requested [null]
+janus_1  | org.apache.tinkerpop.gremlin.server.op.OpProcessorException: Invalid OpProcessor requested [null]
+janus_1  | 	at org.apache.tinkerpop.gremlin.server.handler.OpSelectorHandler.decode(OpSelectorHandler.java:93)
+janus_1  | 	at org.apache.tinkerpop.gremlin.server.handler.OpSelectorHandler.decode(OpSelectorHandler.java:50)
+janus_1  | 	at io.netty.handler.codec.MessageToMessageDecoder.channelRead(MessageToMessageDecoder.java:89)
+janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308)
+janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294)
+janus_1  | 	at io.netty.handler.codec.MessageToMessageDecoder.channelRead(MessageToMessageDecoder.java:103)
+janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308)
+janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294)
+janus_1  | 	at io.netty.handler.codec.MessageToMessageDecoder.channelRead(MessageToMessageDecoder.java:103)
+janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308)
+janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294)
+janus_1  | 	at io.netty.handler.codec.MessageToMessageDecoder.channelRead(MessageToMessageDecoder.java:103)
+janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308)
+janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294)
+janus_1  | 	at io.netty.handler.codec.MessageToMessageDecoder.channelRead(MessageToMessageDecoder.java:103)
+janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308)
+janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294)
+janus_1  | 	at io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler$1.channelRead(WebSocketServerProtocolHandler.java:146)
+janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308)
+janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294)
+janus_1  | 	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:244)
+janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308)
+janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294)
+janus_1  | 	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:846)
+janus_1  | 	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:131)
+janus_1  | 	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
+janus_1  | 	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
+janus_1  | 	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
+janus_1  | 	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
+janus_1  | 	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:111)
+janus_1  | 	at java.lang.Thread.run(Thread.java:748)
 ```
 
 
