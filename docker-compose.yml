@@ -22,21 +22,25 @@ services:
       - db
       - index
   db:
-    image: cassandra:2.1
+    image: scylladb/scylla:1.7.2
     ports:
-     # http://cassandra.apache.org/doc/latest/faq/index.html#what-ports
-     # CQL ports
+     # http://docs.scylladb.com/kb/posix/
+     # REST API
+     - "10000:10000"
+     # CQL ports (native_transport_port)
      - "9042:9042"
-     - "9142:9142"
-     # Thrift
+     # Thrift (rpc_port)
      - "9160:9160"
      # Internode
      - "7000:7000"
      - "7001:7001"
      # JMX
      - "7199:7199"
+     # Prometheus monitoring
+     - "9180:9180"
+     - "9100:9100"
     volumes:
-     - ./data/cassandra/data:/var/lib/cassandra
+     - ./data/scylla/data:/var/lib/scylla
   index:
     image: elasticsearch:1.5
     ports:

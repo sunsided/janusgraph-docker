@@ -11,7 +11,7 @@ Note that a version of [Docker Compose](https://github.com/docker/compose) with 
 Afterwards, you can connect to the local Gremlin shell using
 
 ```
-docker exec -it janusgraph_janus_1 ./bin/gremlin.sh
+docker exec -it janusgraphdocker_janus_1 ./bin/gremlin.sh
 ```
 
 The `python-test` subdirectories contains some simplistic Python scripts to test communication with JanusGraph.
@@ -27,9 +27,12 @@ For multiple graphs in Titan (and likely also JanusGraph), follow these links:
 * [Serving multiple Titan graphs over Gremlin Server (TinkerPop 3)](https://medium.com/@jbmusso/serving-multiple-titan-graphs-over-gremlin-server-tinkerpop-3-d3c971d07964)
 * [One graph in one Titan instance](https://jaceklaskowski.gitbooks.io/titan-scala/content/one_graph_in_one_titan_instance.html)
 
-## Cassandra and Elasticsearch
+## Scylla/Cassandra and Elasticsearch
 
 As per [compatibility matrix](http://docs.janusgraph.org/latest/version-compat.html), the supported Cassandra version is 2.1 and the supported Elasticsearch version is 1.5.
+This repository uses [Scylla](http://www.scylladb.com/) instead of Cassandra, and according to the [Scylla Cassandra Compatibility](http://docs.scylladb.com/cassandra-compatibility/) matrix we find that Scylla 1.7.2 is a drop-in replacement for Cassandra 2.1.8. 
+
+The latest commit using Cassandra in this repo is 39c537de03a1bb7a65138b535df1ff003e8c4ec6, if you are interested in that.
 
 ## Shell
 
