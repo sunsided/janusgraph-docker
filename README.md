@@ -6,7 +6,7 @@ Docker deployment of [JanusGraph](http://janusgraph.org/). To run,
 docker-compose up --build
 ```
 
-Note that a version of `docker-compose` with support for version `3` schemas is required, e.g. `1.15.0`.
+Note that a version of [Docker Compose](https://github.com/docker/compose) with support for version `3` schemas is required, e.g. `1.15.0`.
 
 Afterwards, you can connect to the local Gremlin shell using
 
