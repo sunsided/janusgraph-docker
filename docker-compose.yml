@@ -8,11 +8,11 @@ version: '3'
 
 services:
   janus:
-    image: janusgraph:1.0.0-hadoop2
+    image: janusgraph:0.2.0-hadoop2
     build:
       dockerfile: Dockerfile.janus
       args:
-        version: 0.1.1
+        version: 0.2.0
         hadoop: hadoop2
       context: ./
     ports:
