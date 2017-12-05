@@ -22,7 +22,7 @@ services:
       - db
       - index
   db:
-    image: scylladb/scylla:1.7.2
+    image: scylladb/scylla:2.0.1
     ports:
      # http://docs.scylladb.com/kb/posix/
      # REST API
