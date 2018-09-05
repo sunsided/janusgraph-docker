@@ -1,18 +1,21 @@
 version: '3'
 
-# As of Titan 1.0.0, only Cassandra 2.1 and Elasticsearch 1.5
-# are supported. Attempting to run it on Cassandra 3 results in tears.
+# As of JanusGraph 0.3.0, up to Cassandra 3.11 and Elasticsearch 6.x
+# are supported.
 #
 # Here's the compatibility matrix:
-#   http://s3.thinkaurelius.com/docs/titan/1.0.0/version-compat.html
+#   https://docs.janusgraph.org/latest/version-compat.html
+#
+# Here's the compatibility data for ScyllaDB:
+#   http://docs.scylladb.com/using-scylla/cassandra-compatibility/
 
 services:
   janus:
-    image: janusgraph:0.2.0-hadoop2
+    image: janusgraph:0.3.0-hadoop2
     build:
       dockerfile: Dockerfile.janus
       args:
-        version: 0.2.0
+        version: 0.3.0
         hadoop: hadoop2
       context: ./
     ports:
@@ -22,7 +25,7 @@ services:
       - db
       - index
   db:
-    image: scylladb/scylla:2.0.1
+    image: scylladb/scylla:2.2.0
     ports:
      # http://docs.scylladb.com/kb/posix/
      # REST API
@@ -41,10 +44,12 @@ services:
      - "9100:9100"
     volumes:
      - ./data/scylla/data:/var/lib/scylla
+
   index:
-    image: elasticsearch:5
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.0
     ports:
      - "9200:9200"
      - "9300:9300"
+    user: "1000"
     volumes:
      - ./data/elasticsearch/data:/usr/share/elasticsearch/data
