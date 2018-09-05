@@ -6,6 +6,10 @@ def globals = [:]
 globals << [hook : [
         onStartUp: { ctx ->
             ctx.logger.info("Executed once at startup of Gremlin Server.")
+            
+            // See https://github.com/experoinc/gremlin-lang-intro for further details.
+            ctx.logger.info("Loading Air Routes data set into Graph: [graph] from data/air-routes.graphml. Use TraversalSource: [g]")
+            graph.io(graphml()).readGraph('data/air-routes-small.graphml')
         },
         onShutDown: { ctx ->
             ctx.logger.info("Executed once at shutdown of Gremlin Server.")
