@@ -2,7 +2,7 @@
 
 Docker deployment of [JanusGraph](http://janusgraph.org/). To run,
 
-```
+```bash
 docker-compose up --build
 ```
 
@@ -10,7 +10,7 @@ Note that a version of [Docker Compose](https://github.com/docker/compose) with 
 
 Afterwards, you can connect to the local Gremlin shell using
 
-```
+```bash
 docker exec -it janusgraphdocker_janus_1 ./bin/gremlin.sh
 ```
 
@@ -29,8 +29,8 @@ For multiple graphs in Titan (and likely also JanusGraph), follow these links:
 
 ## Scylla/Cassandra and Elasticsearch
 
-As per [compatibility matrix](http://docs.janusgraph.org/latest/version-compat.html), the supported Cassandra version is 3.11 and the supported Elasticsearch version is 5.
-This repository uses [Scylla](http://www.scylladb.com/) instead of Cassandra, and according to the [Scylla Cassandra Compatibility](http://docs.scylladb.com/cassandra-compatibility/) matrix we find that Scylla 2.0 is a drop-in replacement for Cassandra 2.1.8.
+As per [compatibility matrix](http://docs.janusgraph.org/latest/version-compat.html), the supported Cassandra version is 3.11 and the supported Elasticsearch version is 6.
+This repository uses [Scylla](http://www.scylladb.com/) instead of Cassandra, and according to the [Scylla Cassandra Compatibility](http://docs.scylladb.com/cassandra-compatibility/) matrix we find that Scylla 2.2 is a drop-in replacement for Cassandra 2.1.8.
 
 The latest commit using Cassandra in this repo is 39c537de03a1bb7a65138b535df1ff003e8c4ec6, if you are interested in that.
 
@@ -74,9 +74,9 @@ The `g` mapping (available at the server) is registered in `scripts/empty-sample
 
 You [have to choose the Channelizer](http://docs.janusgraph.org/latest/server.html#_websocket_versus_rest) to work with, either `HttpChannelizer` or `WebSocketChannelizer`.
 
-Using the `HttpChannelizer` 
+Using the `HttpChannelizer`
 
-```
+```yaml
 channelizer: org.apache.tinkerpop.gremlin.server.channel.HttpChannelizer
 ```
 
@@ -124,13 +124,18 @@ io.netty.handler.codec.http.websocketx.WebSocketHandshakeException: Invalid hand
 	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
 	at java.lang.Thread.run(Thread.java:748)
 22:52:14 ERROR org.apache.tinkerpop.gremlin.driver.Handler$GremlinResponseHandler  - Could not process the response - correct the problem and restart the driver.
-
 ```
 
 The REPL shell does seem to work with the `WebSocketChannelizer` though:
 
-```
+```yaml
 channelizer: org.apache.tinkerpop.gremlin.server.channel.WebSocketChannelizer
+```
+
+Note that the current configuration is to use
+
+```yaml
+channelizer: org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer
 ```
 
 ## Serializers
@@ -139,7 +144,7 @@ The exception `Gremlin Server is not configured with a serializer for the reques
 
 Running with the configuration of
 
-```
+```yaml
   - { className: org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0, config: { useMapperFromGraph: graph }}
   - { className: org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0, config: { serializeResultToString: true }}
   - { className: org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerGremlinV1d0, config: { useMapperFromGraph: graph }}
@@ -197,5 +202,3 @@ janus_1  | 	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
 janus_1  | 	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:111)
 janus_1  | 	at java.lang.Thread.run(Thread.java:748)
 ```
-
-
