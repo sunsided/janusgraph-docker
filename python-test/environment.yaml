@@ -1,0 +1,36 @@
+name: janusgraph
+channels:
+  - defaults
+dependencies:
+  - ca-certificates=2018.03.07=0
+  - certifi=2018.8.24=py37_1
+  - libedit=3.1.20170329=h6b74fdf_2
+  - libffi=3.2.1=hd88cf55_4
+  - libgcc-ng=8.2.0=hdf63c60_1
+  - libstdcxx-ng=8.2.0=hdf63c60_1
+  - ncurses=6.1=hf484d3e_0
+  - openssl=1.0.2p=h14c3975_0
+  - pip=10.0.1=py37_0
+  - python=3.7.0=hc3d631a_0
+  - pyyaml=3.13=py37h14c3975_0
+  - readline=7.0=h7b6447c_5
+  - setuptools=40.2.0=py37_0
+  - sqlite=3.24.0=h84994c4_0
+  - tk=8.6.8=hbc83047_0
+  - wheel=0.31.1=py37_0
+  - xz=5.2.4=h14c3975_4
+  - yaml=0.1.7=had09818_2
+  - zlib=1.2.11=ha838bed_2
+  - pip:
+    - aenum==1.4.5
+    - aiogremlin==3.2.6
+    - aiohttp==3.4.4
+    - async-timeout==3.0.0
+    - attrs==18.2.0
+    - chardet==3.0.4
+    - gremlinpython==3.2.9
+    - idna==2.7
+    - multidict==4.4.0
+    - six==1.10.0
+    - tornado==4.4.1
+    - yarl==1.2.6
