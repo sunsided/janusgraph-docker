@@ -11,7 +11,7 @@ Note that a version of [Docker Compose](https://github.com/docker/compose) with 
 Afterwards, you can connect to the local Gremlin shell using
 
 ```bash
-docker exec -it janusgraphdocker_janus_1 ./bin/gremlin.sh
+docker-compose exec janus ./bin/gremlin.sh
 ```
 
 The `python-test` subdirectories contains some simplistic Python scripts to test communication with JanusGraph.
