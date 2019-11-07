@@ -1,7 +1,7 @@
 FROM openjdk:8-jdk
 LABEL maintainer="Markus Mayer <widemeadows@gmail.com>"
 
-ARG version=0.3.0
+ARG version=0.4.0
 ARG hadoop=hadoop2
 
 RUN apt-get update && \
@@ -16,13 +16,13 @@ RUN apt-get update && \
 WORKDIR /workspace/janusgraph
 
 # This next step might take a while.
-RUN bin/gremlin-server.sh -i org.apache.tinkerpop gremlin-python 3.3.3
+RUN bin/gremlin-server.sh -i org.apache.tinkerpop gremlin-python 3.4.1
 
 COPY janusgraph/gremlin-server.yaml /workspace/janusgraph/conf/gremlin-server/gremlin-server.yaml
-COPY janusgraph/janusgraph.properties /workspace/janusgraph/janusgraph.properties
+COPY janusgraph/*.properties /workspace/janusgraph/
 
 # Example graphs and data
-COPY janusgraph/empty-sample.groovy /workspace/janusgraph/scripts/empty-sample.groovy
+COPY janusgraph/*.groovy /workspace/janusgraph/scripts/
 COPY janusgraph/data/*.graphml /workspace/janusgraph/data/
 
 COPY janusgraph/run.sh /workspace/janusgraph

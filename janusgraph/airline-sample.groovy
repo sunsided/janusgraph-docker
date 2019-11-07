@@ -9,7 +9,8 @@ globals << [hook : [
             
             // See https://github.com/experoinc/gremlin-lang-intro for further details.
             ctx.logger.info("Loading Air Routes data set into Graph: [graph] from data/air-routes.graphml. Use TraversalSource: [g]")
-            graph.io(graphml()).readGraph('data/air-routes-small.graphml')
+            airlines.io(graphml()).readGraph('data/air-routes-small.graphml')
+            airlines.tx().commit()  
         },
         onShutDown: { ctx ->
             ctx.logger.info("Executed once at shutdown of Gremlin Server.")
@@ -17,4 +18,4 @@ globals << [hook : [
 ] as LifeCycleHook]
 
 // define the default TraversalSource to bind queries to - this one will be named "g".
-globals << [g : graph.traversal()]
+globals << [g : airlines.traversal()]

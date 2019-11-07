@@ -36,10 +36,18 @@ The latest commit using Cassandra in this repo is 39c537de03a1bb7a65138b535df1ff
 
 ## Shell
 
-In the Gremin REPL examples like this one:
+This Docker example loads an [airline graph](data/air-routes-small.graphml) and
+exposes it as graph `g` in `scripts/airlines-sample.groovy`.
+
+After opening the Gremlin shell in Docker by running e.g.
+
+```bash
+docker exec -it janusgraphdocker_janus_1 ./bin/gremlin.sh
+```
+
+You should be greetet by the Gremlin REPL shell:
 
 ```
-$  bin/gremlin.sh
          \,,,/
          (o o)
 -----oOOo-(3)-oOOo-----
@@ -48,157 +56,98 @@ plugin activated: tinkerpop.hadoop
 plugin activated: tinkerpop.utilities
 plugin activated: aurelius.titan
 plugin activated: tinkerpop.tinkergraph
-gremlin> :remote connect tinkerpop.server conf/remote.yaml
-==>Connected - localhost/127.0.0.1:8182
-gremlin> :> graph.addVertex("name", "stephen")
-==>v[256]
-gremlin> :> g.V().values('name')
-==>stephen
+gremlin>
 ```
 
-The token `:>` is not part of the _shell_, but an actual _command_. It is required to run the command on the remote server.
-
-That makes the commands:
+From here, connect to JanusGraph with a session, then forward all commands
+to the remote server (this allows skipping the `:>` syntax that's 
+required otherwise):
 
 ```
-:remote connect tinkerpop.server conf/remote.yaml
-:> graph.addVertex("name", "stephen")
-:> g.V().values('name')
+:remote connect tinkerpop.server conf/remote.yaml session
+:remote console
 ```
 
-Entering invalid commands in the shell results in an exception on the server.
+You will find the airlines data exposed as graph `g`. We can inspect the vertex count by running e.g.
 
-The `g` mapping (available at the server) is registered in `scripts/empty-sample.groovy`.
+```
+g.V().count()
+```
+
+This should return a value of `47`. Note that after restarting, the graph is imported again, resulting in
+data duplication. To drop all vertices and edges, and re-import from scratch, we can run
+
+```
+g.V().drop().iterate()
+airlines.io(graphml()).readGraph('data/air-routes-small.graphml')
+g.tx().commit()
+```
+
+To build an index over the `code` property, run
+
+```
+mgmt = airlines.openManagement()
+code = mgmt.getPropertyKey('code')
+mgmt.buildIndex('byCodeUnique', Vertex.class).addKey(code).unique().buildCompositeIndex()
+mgmt.commit()
+airlines.tx().commit()
+```
+
+We can then - for example - get all properties of the vertex with code `JFK`:
+
+```
+g.V().has('code', 'JFK').valueMap()
+```
+
+This should return:
+
+```
+==>{code=[JFK], type=[airport], desc=[New York John F. Kennedy International Airport], country=[US], longest=[14511], city=[New York], elev=[12], icao=[KJFK], lon=[-73.77890015], region=[US-NY], runways=[4], lat=[40.63980103]}
+```
+
+We could now run path queries, e.g. [find a path](http://tinkerpop.apache.org/docs/3.0.0-incubating/#simplepath-step)
+between _Honolulu International_ and _Houston Hobby_ and return the airport codes and city names:
+
+```
+g.V().has('code', 'HNL').repeat(out().simplePath()).until(has('code', 'HOU')).path().by(valueMap('code', 'city')).limit(1)
+```
+
+This should return:
+
+```
+==>path[{code=[HNL], city=[Honolulu]}, {code=[DFW], city=[Dallas]}, {code=[HOU], city=[Houston]}]
+```
+
+To leave the shell, type `:quit`.
 
 ## Channelizers
 
-You [have to choose the Channelizer](http://docs.janusgraph.org/latest/server.html#_websocket_versus_rest) to work with, either `HttpChannelizer` or `WebSocketChannelizer`.
+You [have to choose the Channelizer](https://docs.janusgraph.org/basics/server/#janusgraph-server-as-both-a-websocket-and-http-endpoint) to work with, e.g. `HttpChannelizer`, `WebSocketChannelizer` or `WsAndHttpChannelizer`/`JanusGraphWsAndHttpChannelizer`.
 
-Using the `HttpChannelizer`
+Using the `JanusGraphWsAndHttpChannelizer`
 
 ```yaml
-channelizer: org.apache.tinkerpop.gremlin.server.channel.HttpChannelizer
+channelizer: org.janusgraph.channelizers.JanusGraphWsAndHttpChannelizer
 ```
 
-allows for HTTP access to JanusGraph using e.g.
+allows for HTTP access to JanusGraph using e.g. determining `100 - 1` (hint: it's `99`)
 
 ```bash
 curl "http://localhost:8182/?gremlin=100-1"
 ```
 
-However, this seems to prevent the Gremlin REPL shell from talking to the server:
+or running complete queries (URL encoded):
 
-```
-Jul 17, 2017 10:52:00 PM java.util.prefs.FileSystemPreferences$1 run
-INFO: Created user preferences directory.
-
-         \,,,/
-         (o o)
------oOOo-(3)-oOOo-----
-plugin activated: aurelius.titan
-plugin activated: tinkerpop.server
-plugin activated: tinkerpop.utilities
-plugin activated: tinkerpop.hadoop
-plugin activated: tinkerpop.tinkergraph
-gremlin> :remote connect tinkerpop.server conf/remote.yaml
-22:52:14 WARN  org.apache.tinkerpop.gremlin.driver.handler.WebSocketClientHandler  - Exception caught during WebSocket processing - closing connection
-io.netty.handler.codec.http.websocketx.WebSocketHandshakeException: Invalid handshake response getStatus: 400 Bad Request
-	at io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker13.verify(WebSocketClientHandshaker13.java:182)
-	at io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker.finishHandshake(WebSocketClientHandshaker.java:202)
-	at org.apache.tinkerpop.gremlin.driver.handler.WebSocketClientHandler.channelRead0(WebSocketClientHandler.java:73)
-	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:105)
-	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308)
-	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294)
-	at io.netty.handler.codec.MessageToMessageDecoder.channelRead(MessageToMessageDecoder.java:103)
-	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308)
-	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294)
-	at io.netty.handler.codec.ByteToMessageDecoder.channelInactive(ByteToMessageDecoder.java:241)
-	at io.netty.handler.codec.http.HttpClientCodec$Decoder.channelInactive(HttpClientCodec.java:212)
-	at io.netty.channel.CombinedChannelDuplexHandler.channelInactive(CombinedChannelDuplexHandler.java:132)
-	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelInactive(AbstractChannelHandlerContext.java:208)
-	at io.netty.channel.AbstractChannelHandlerContext.fireChannelInactive(AbstractChannelHandlerContext.java:194)
-	at io.netty.channel.DefaultChannelPipeline.fireChannelInactive(DefaultChannelPipeline.java:828)
-	at io.netty.channel.AbstractChannel$AbstractUnsafe$5.run(AbstractChannel.java:576)
-	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:380)
-	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:357)
-	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:116)
-	at java.lang.Thread.run(Thread.java:748)
-22:52:14 ERROR org.apache.tinkerpop.gremlin.driver.Handler$GremlinResponseHandler  - Could not process the response - correct the problem and restart the driver.
+```bash
+curl http://localhost:8182/?gremlin=g.V().has(%27code%27,%20%27JFK%27).valueMap()
 ```
 
-The REPL shell does seem to work with the `WebSocketChannelizer` though:
+... or somewhat clearer as a JSON `POST`
 
-```yaml
-channelizer: org.apache.tinkerpop.gremlin.server.channel.WebSocketChannelizer
-```
-
-Note that the current configuration is to use
-
-```yaml
-channelizer: org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer
-```
-
-## Serializers
-
-The exception `Gremlin Server is not configured with a serializer for the requested mime type [application/vnd.gremlin-v2.0+json] - using org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerV1d0 by default` occurs when the `GraphSONMessageSerializerGremlinV2d0` was not added to the serializers list of serializers.
-
-Running with the configuration of
-
-```yaml
-  - { className: org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0, config: { useMapperFromGraph: graph }}
-  - { className: org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0, config: { serializeResultToString: true }}
-  - { className: org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerGremlinV1d0, config: { useMapperFromGraph: graph }}
-  - { className: org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerGremlinV2d0, config: { useMapperFromGraph: graph }}
-  - { className: org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerV1d0, config: { useMapperFromGraph: graph }}
-  - { className: org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerV2d0, config: { useMapperFromGraph: graph }}
-```
-
-results in these startup outputs:
-
-```
-janus_1  | 40470 [main] INFO  org.apache.tinkerpop.gremlin.server.AbstractChannelizer  - Configured application/vnd.gremlin-v1.0+gryo with org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0
-janus_1  | 40470 [main] INFO  org.apache.tinkerpop.gremlin.server.AbstractChannelizer  - Configured application/vnd.gremlin-v1.0+gryo-stringd with org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0
-janus_1  | 40476 [main] INFO  org.apache.tinkerpop.gremlin.server.AbstractChannelizer  - Configured application/vnd.gremlin-v1.0+json with org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerGremlinV1d0
-janus_1  | 40496 [main] INFO  org.apache.tinkerpop.gremlin.server.AbstractChannelizer  - Configured application/vnd.gremlin-v2.0+json with org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerGremlinV2d0
-janus_1  | 40497 [main] INFO  org.apache.tinkerpop.gremlin.server.AbstractChannelizer  - Configured application/json with org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerV1d0
-```
-
-Here's the full exception rendering:
-
-```
-janus_1  | 1481034 [gremlin-server-worker-1] WARN  org.apache.tinkerpop.gremlin.server.handler.WsGremlinBinaryRequestDecoder  - Gremlin Server is not configured with a serializer for the requested mime type [application/vnd.gremlin-v2.0+json] - using org.apache.tinkerpop.gremlin.driver.ser.GraphSONMessageSerializerV1d0 by default
-janus_1  | 1481034 [gremlin-server-worker-1] WARN  org.apache.tinkerpop.gremlin.driver.ser.AbstractGraphSONMessageSerializerV1d0  - Request [PooledUnsafeDirectByteBuf(ridx: 226, widx: 226, cap: 260)] could not be deserialized by org.apache.tinkerpop.gremlin.driver.ser.AbstractGraphSONMessageSerializerV1d0.
-janus_1  | 1481034 [gremlin-server-worker-1] WARN  org.apache.tinkerpop.gremlin.server.handler.OpSelectorHandler  - Invalid OpProcessor requested [null]
-janus_1  | org.apache.tinkerpop.gremlin.server.op.OpProcessorException: Invalid OpProcessor requested [null]
-janus_1  | 	at org.apache.tinkerpop.gremlin.server.handler.OpSelectorHandler.decode(OpSelectorHandler.java:93)
-janus_1  | 	at org.apache.tinkerpop.gremlin.server.handler.OpSelectorHandler.decode(OpSelectorHandler.java:50)
-janus_1  | 	at io.netty.handler.codec.MessageToMessageDecoder.channelRead(MessageToMessageDecoder.java:89)
-janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308)
-janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294)
-janus_1  | 	at io.netty.handler.codec.MessageToMessageDecoder.channelRead(MessageToMessageDecoder.java:103)
-janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308)
-janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294)
-janus_1  | 	at io.netty.handler.codec.MessageToMessageDecoder.channelRead(MessageToMessageDecoder.java:103)
-janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308)
-janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294)
-janus_1  | 	at io.netty.handler.codec.MessageToMessageDecoder.channelRead(MessageToMessageDecoder.java:103)
-janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308)
-janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294)
-janus_1  | 	at io.netty.handler.codec.MessageToMessageDecoder.channelRead(MessageToMessageDecoder.java:103)
-janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308)
-janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294)
-janus_1  | 	at io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler$1.channelRead(WebSocketServerProtocolHandler.java:146)
-janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308)
-janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294)
-janus_1  | 	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:244)
-janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:308)
-janus_1  | 	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:294)
-janus_1  | 	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:846)
-janus_1  | 	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:131)
-janus_1  | 	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:511)
-janus_1  | 	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:468)
-janus_1  | 	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:382)
-janus_1  | 	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:354)
-janus_1  | 	at io.netty.util.concurrent.SingleThreadEventExecutor$2.run(SingleThreadEventExecutor.java:111)
-janus_1  | 	at java.lang.Thread.run(Thread.java:748)
+```bash
+curl -X POST http://localhost:8182/ \
+  -H 'Content-Length: 52' \
+  -H 'Content-Type: application/json' \
+  -H 'Host: localhost:8182' \
+  -d '{ "gremlin": "g.V().has('\''code'\'', '\''JFK'\'').valueMap()" }'
 ```
