@@ -155,7 +155,7 @@ curl -X POST http://localhost:8182/ \
 ## Python connectivity
 
 To test connectivity with Python, try out the scripts in the [`python-test/`](python-test/) directory.
-A Anaconda/conda environment is provided in [environment.yaml](python-test/environment.yaml):
+A conda environment is provided in [environment.yaml](python-test/environment.yaml):
 
 ```bash
 conda env create -f environment.yaml
