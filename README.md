@@ -6,7 +6,7 @@ Docker deployment of [JanusGraph](http://janusgraph.org/). To run,
 docker-compose up --build
 ```
 
-Note that a version of [Docker Compose](https://github.com/docker/compose) with support for version `3` schemas is required, e.g. `1.15.0`.
+Note that a version of [Docker Compose](https://github.com/docker/compose) with support for version `3` schemas is required, e.g. `1.15.0` or newer.
 
 Afterwards, you can connect to the local Gremlin shell using
 
@@ -29,14 +29,14 @@ For multiple graphs in Titan (and likely also JanusGraph), follow these links:
 
 ## Scylla/Cassandra and Elasticsearch
 
-As per [compatibility matrix](http://docs.janusgraph.org/latest/version-compat.html), the supported Cassandra version is 3.11 and the supported Elasticsearch version is 6.
-This repository uses [Scylla](http://www.scylladb.com/) instead of Cassandra, and according to the [Scylla Cassandra Compatibility](http://docs.scylladb.com/cassandra-compatibility/) matrix we find that Scylla 2.2 is a drop-in replacement for Cassandra 2.1.8.
+As per [compatibility matrix](https://docs.janusgraph.org/changelog/#version-compatibility-matrix), the supported Cassandra version is 3.11 and the supported Elasticsearch version is 6.6.
+This repository uses [Scylla](http://www.scylladb.com/) instead of Cassandra, and according to the [Scylla Cassandra Compatibility](http://docs.scylladb.com/cassandra-compatibility/) matrix we find that Scylla 3.0 is a drop-in replacement for Cassandra 3.11.
 
 The latest commit using Cassandra in this repo is 39c537de03a1bb7a65138b535df1ff003e8c4ec6, if you are interested in that.
 
 ## Shell
 
-This Docker example loads an [airline graph](data/air-routes-small.graphml) and
+This Docker example loads an [airline graph](janusgraph/data/air-routes-small.graphml) and
 exposes it as graph `g` in `scripts/airlines-sample.groovy`.
 
 After opening the Gremlin shell in Docker by running e.g.
@@ -45,7 +45,7 @@ After opening the Gremlin shell in Docker by running e.g.
 docker exec -it janusgraphdocker_janus_1 ./bin/gremlin.sh
 ```
 
-You should be greetet by the Gremlin REPL shell:
+You should be greeted by the Gremlin REPL shell:
 
 ```
          \,,,/
@@ -75,7 +75,7 @@ g.V().count()
 ```
 
 This should return a value of `47`. Note that after restarting, the graph is imported again, resulting in
-data duplication. To drop all vertices and edges, and re-import from scratch, we can run
+data duplication. To drop all vertices and edges - and then re-import from scratch - we can run
 
 ```
 g.V().drop().iterate()
@@ -130,7 +130,7 @@ Using the `JanusGraphWsAndHttpChannelizer`
 channelizer: org.janusgraph.channelizers.JanusGraphWsAndHttpChannelizer
 ```
 
-allows for HTTP access to JanusGraph using e.g. determining `100 - 1` (hint: it's `99`)
+allows for HTTP access to JanusGraph, allowing to e.g. determine `100 - 1` (hint: it's `99`)
 
 ```bash
 curl "http://localhost:8182/?gremlin=100-1"
@@ -142,7 +142,7 @@ or running complete queries (URL encoded):
 curl http://localhost:8182/?gremlin=g.V().has(%27code%27,%20%27JFK%27).valueMap()
 ```
 
-... or somewhat clearer as a JSON `POST`
+... which is a bit clearer when using a JSON `POST`:
 
 ```bash
 curl -X POST http://localhost:8182/ \
