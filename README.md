@@ -151,3 +151,30 @@ curl -X POST http://localhost:8182/ \
   -H 'Host: localhost:8182' \
   -d '{ "gremlin": "g.V().has('\''code'\'', '\''JFK'\'').valueMap()" }'
 ```
+
+## Python connectivity
+
+To test connectivity with Python, try out the scripts in the [`python-test/`](python-test/) directory.
+A Anaconda/conda environment is provided in [environment.yaml](python-test/environment.yaml):
+
+```bash
+conda env create -f environment.yaml
+conda activate janusgraph
+```
+
+Try running the [gremlinpython](https://pypi.org/project/gremlinpython/) example:
+
+```bash
+python test_gremlin_python.py
+```
+
+This should output:
+
+```
+Hop 1: HNL - Honolulu
+Hop 2: DFW - Dallas
+Hop 3: HOU - Houston
+```
+
+Note that the [aiogremlin](https://aiogremlin.readthedocs.io/en/latest/) example is notoriously
+broken; that's presumably because the package lags behind the TinkerPop version quite a bit.

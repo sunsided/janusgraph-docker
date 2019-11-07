@@ -1,2 +1,2 @@
-aiogremlin==3.2.6
-gremlinpython==3.2.9
+aiogremlin==3.3.1
+gremlinpython==3.4.1
