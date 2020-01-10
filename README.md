@@ -179,7 +179,7 @@ Hop 3: HOU - Houston
 Note that the [aiogremlin](https://aiogremlin.readthedocs.io/en/latest/) example is notoriously
 broken; that's presumably because the package lags behind the TinkerPop version quite a bit.
 
-## Using Cypher
+## Using the Cypher Traversal Source
 
 To use Cypher alongside with Gremlin, connect to the Gremlin console and run:
 
@@ -204,4 +204,36 @@ Or only use Gremlin:
 
 ```
 g.V().hasLabel('airport').as('p').select('p').by(valueMap().select('desc').project('name')).dedup()
+```
+
+### Using Cypher directly (in the Gremlin Shell)
+
+In the Gremlin shell, you can also run Cypher queries directly. To do so, run
+
+```
+:plugin use opencypher.gremlin
+:remote connect opencypher.gremlin conf/remote-objects.yaml translate gremlin
+```
+
+Alternatively, server-side translations can be used (note the `:remote config alias g airlines` command!):
+
+```
+:plugin use opencypher.gremlin
+:remote connect opencypher.gremlin conf/remote-objects.yaml translate gremlin
+:remote config alias g airlines
+```
+
+You can then run Cypher commands directly on the remote source:
+
+```
+:> MATCH (p:airport) RETURN p.desc AS name
+```
+
+Note that `:remote console` does not work in this case.
+
+The Cypher `EXPLAIN` command can be used to inspect the equivalent Gremlin query:
+
+```
+gremlin> :> EXPLAIN MATCH (p:airport) RETURN p.desc AS name
+==>[translation:g.V().hasLabel('airport').project('name').by(__.choose(__.values('desc'), __.values('desc'), __.constant('  cypher.null'))),options:[EXPLAIN]]
 ```
