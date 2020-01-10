@@ -42,7 +42,7 @@ exposes it as graph `g` in `scripts/airlines-sample.groovy`.
 After opening the Gremlin shell in Docker by running e.g.
 
 ```bash
-docker exec -it janusgraphdocker_janus_1 ./bin/gremlin.sh
+docker-compose exec janus ./bin/gremlin.sh
 ```
 
 You should be greeted by the Gremlin REPL shell:
@@ -60,7 +60,7 @@ gremlin>
 ```
 
 From here, connect to JanusGraph with a session, then forward all commands
-to the remote server (this allows skipping the `:>` syntax that's 
+to the remote server using `:remote console` (this allows skipping the `:>` syntax that's
 required otherwise):
 
 ```
@@ -178,3 +178,30 @@ Hop 3: HOU - Houston
 
 Note that the [aiogremlin](https://aiogremlin.readthedocs.io/en/latest/) example is notoriously
 broken; that's presumably because the package lags behind the TinkerPop version quite a bit.
+
+## Using Cypher
+
+To use Cypher alongside with Gremlin, connect to the Gremlin console and run:
+
+```
+:plugin use opencypher.gremlin
+g = EmptyGraph.instance().traversal(CypherTraversalSource.class).withRemote('conf/remote-airlines.properties')
+```
+
+Next, run your Cypher command using `g.cypher()`:
+
+```
+g.cypher('MATCH (p:airport) RETURN p.desc AS name')
+```
+
+You can also mix and match Cypher and Gremlin:
+
+```
+g.cypher('MATCH (p:airport) RETURN p').select('p').by(valueMap().select('desc').project('name')).dedup()
+```
+
+Or only use Gremlin:
+
+```
+g.V().hasLabel('airport').as('p').select('p').by(valueMap().select('desc').project('name')).dedup()
+```

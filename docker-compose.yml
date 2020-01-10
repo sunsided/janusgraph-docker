@@ -15,8 +15,9 @@ services:
     build:
       dockerfile: Dockerfile.janus
       args:
-        version: 0.4.0
-        hadoop: hadoop2
+        VERSION: "0.4.0"
+        HADOOP: hadoop2
+        CYPHER_GREMLIN_VERSION: "1.0.0"
       context: ./
     ports:
       - "8182:8182"

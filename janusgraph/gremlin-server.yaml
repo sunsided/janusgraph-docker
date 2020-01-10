@@ -7,8 +7,8 @@ channelizer: org.janusgraph.channelizers.JanusGraphWsAndHttpChannelizer
 
 graphManager: org.janusgraph.graphdb.management.JanusGraphManager
 graphs: {
-  ConfigurationManagementGraph: janusgraph-cql-configurationgraph.properties,
-  airlines: airlines.properties
+  ConfigurationManagementGraph: conf/janusgraph-cql-configurationgraph.properties,
+  airlines: conf/airlines.properties
 }
 
 scriptEngines: {
