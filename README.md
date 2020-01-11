@@ -1,4 +1,6 @@
-# JanusGraph: Lessons learned
+# JanusGraph (in Docker) - Lessons learned
+
+![JanusGraph logo](.readme/janusgraph.png)
 
 Docker deployment of [JanusGraph](http://janusgraph.org/). To run,
 
@@ -34,7 +36,9 @@ This repository uses [Scylla](http://www.scylladb.com/) instead of Cassandra, an
 
 The latest commit using Cassandra in this repo is 39c537de03a1bb7a65138b535df1ff003e8c4ec6, if you are interested in that.
 
-## Shell
+## Gremlin Shell
+
+![](.readme/gremlin.png)
 
 This Docker example loads an [airline graph](janusgraph/data/air-routes-small.graphml) and
 exposes it as graph `g` in `scripts/airlines-sample.groovy`.
