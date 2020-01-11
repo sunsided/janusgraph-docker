@@ -181,6 +181,12 @@ broken; that's presumably because the package lags behind the TinkerPop version 
 
 ## Cypher support
 
+With [Cypher for Gremlin](https://github.com/opencypher/cypher-for-gremlin) (Opencypher), you can query Janusgraph using
+the Cypher query language originating from Neo4j.
+This repo provides a configuration that installs the required plugins.
+
+![Cypher for Gremlin](.readme/cypher-gremlin.svg)
+
 Note that while the examples in this section work out of the box, some Java drivers will fail with
 serialization issues such like `Encountered unregistered class ID: 65536` (e.g. in the Intellij [Graph Database support](https://plugins.jetbrains.com/plugin/8087-graph-database-support) plugin).
 In order to have Cypher support working for those, you will need to "undo" Janusgraph specifics by doing the following changes.
