@@ -200,7 +200,8 @@ In `gremlin-server.yaml`, replace
 - `org.janusgraph.channelizers.JanusGraphWsAndHttpChannelizer` with `org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer`, and
 - `org.janusgraph.graphdb.tinkerpop.JanusGraphIoRegistry` with `org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerIoRegistryV3d0`.
 
-After this, you should be good to go.
+Then, **use the GraphSON v3 serializer**, since both Gyro and GraphBinary will require
+you to register the exact types. After this, you should be good to go.
 
 ### Using the Cypher Traversal Source
 
