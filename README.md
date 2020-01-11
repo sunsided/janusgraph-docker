@@ -179,7 +179,20 @@ Hop 3: HOU - Houston
 Note that the [aiogremlin](https://aiogremlin.readthedocs.io/en/latest/) example is notoriously
 broken; that's presumably because the package lags behind the TinkerPop version quite a bit.
 
-## Using the Cypher Traversal Source
+## Cypher support
+
+Note that while the examples in this section work out of the box, some Java drivers will fail with
+serialization issues such like `Encountered unregistered class ID: 65536` (e.g. in the Intellij [Graph Database support](https://plugins.jetbrains.com/plugin/8087-graph-database-support) plugin).
+In order to have Cypher support working for those, you will need to "undo" Janusgraph specifics by doing the following changes.
+
+In `gremlin-server.yaml`, replace
+
+- `org.janusgraph.channelizers.JanusGraphWsAndHttpChannelizer` with `org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer`, and
+- `org.janusgraph.graphdb.tinkerpop.JanusGraphIoRegistry` with `org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerIoRegistryV3d0`.
+
+After this, you should be good to go.
+
+### Using the Cypher Traversal Source
 
 To use Cypher alongside with Gremlin, connect to the Gremlin console and run:
 
