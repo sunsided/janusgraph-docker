@@ -188,7 +188,7 @@ This repo provides a configuration that installs the required plugins.
 ![Cypher for Gremlin](.readme/cypher-gremlin.svg)
 
 Note that while the examples in this section work out of the box, some Java drivers will fail with
-serialization issues such like `Encountered unregistered class ID: 65536` (e.g. in the Intellij [Graph Database support](https://plugins.jetbrains.com/plugin/8087-graph-database-support) plugin).
+serialization issues such as `Encountered unregistered class ID: 65536` (e.g. in the Intellij [Graph Database support](https://plugins.jetbrains.com/plugin/8087-graph-database-support) plugin).
 In order to have Cypher support working for those, you will need to "undo" Janusgraph specifics by doing the following changes.
 
 In `gremlin-server.yaml`, replace
