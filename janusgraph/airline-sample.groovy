@@ -6,16 +6,29 @@ def globals = [:]
 globals << [hook : [
         onStartUp: { ctx ->
             ctx.logger.info("Executed once at startup of Gremlin Server.")
-            
+
             // See https://github.com/experoinc/gremlin-lang-intro for further details.
-            ctx.logger.info("Loading Air Routes data set into Graph: [graph] from data/air-routes.graphml. Use TraversalSource: [g]")
+            ctx.logger.info("Loading Air Routes data set into graph [airlines] from data/air-routes.graphml. Use TraversalSource: [g]")
             airlines.io(graphml()).readGraph('data/air-routes-small.graphml')
-            airlines.tx().commit()  
+            airlines.tx().commit()
         },
         onShutDown: { ctx ->
             ctx.logger.info("Executed once at shutdown of Gremlin Server.")
         }
 ] as LifeCycleHook]
 
-// define the default TraversalSource to bind queries to - this one will be named "g".
+// Statically defined graphs (gremlin-server.yaml)
 globals << [g : airlines.traversal()]
+
+// Dynamically defined graphs (ConfiguredGraphFactory)
+def getGraphs() {
+    def graphNames = ConfiguredGraphFactory.getGraphNames();
+    def graphMaps = [:];
+    for (graphName in graphNames) {
+        def g = ConfiguredGraphFactory.open(graphName);
+        graphMaps.put(graphName, g.traversal());
+    }
+    return graphMaps;
+}
+
+globals << getGraphs()
