@@ -219,7 +219,7 @@ Alternatively, server-side translations can be used (note the `:remote config al
 
 ```
 :plugin use opencypher.gremlin
-:remote connect opencypher.gremlin conf/remote-objects.yaml translate gremlin
+:remote connect opencypher.gremlin conf/remote-objects.yaml
 :remote config alias g airlines
 ```
 
